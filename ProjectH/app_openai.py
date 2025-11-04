@@ -13,7 +13,7 @@ if not OPENAI_API_KEY:
     raise RuntimeError("Set OPENAI_API_KEY environment variable first")
 
 DATA_FILE = "payload.json"  # dataset file
-MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+MODEL = os.getenv("OPENAI_MODEL", "gpt-5")
 
 # ==== INIT ====
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -30,28 +30,101 @@ except Exception as e:
 
 # ==== PROMPT ====
 PROMPT_INSTRUCTIONS = """
-You are an API recommendation assistant. I will provide:
-1) a dataset of existing API records under the key "data" (array). Each record includes at least "api_name" and "tags".
-2) a user query, provided either as "query_tags" (array of lowercase single-word tags) or "query_text" (string). Exactly one of those will be non-empty.
+You are an API Recommendation and Matching Assistant.
 
-Task:
-- If "query_text" is provided, produce up to 5 canonical query tags by extracting meaningful single-word technical tokens (lowercase).
-- Find all APIs where at least one tag intersects with the query tags (api.tags ∪ api.tags_generated). Also include APIs with strong semantic similarity (if given embedding, assume it's handled externally).
-- For each matching API produce an object with these keys:
-  - "api_name" (from dataset),
-  - "matched_tags" (array of tags from the API that matched the query tags),
-  - "tags" (the API's tag list),
-  - "summary" (use existing summary if present),
-  - "match_type" (one of "tag", "semantic", "both"),
-  - "score" (0-1 number computed as: 0.65*tag_match_fraction + 0.25*semantic_estimate + 0.10*meta_boost — you may estimate semantic_estimate/meta_boost if not available),
-  - "why" (one short sentence explaining the match).
-- Return a JSON array named "results" sorted by score descending. Output must be valid JSON and nothing else.
+OVERVIEW
+You will be given:
+  - A dataset under top-level key "data": array of API records. Each record contains at least:
+      - "api_name" (string)
+      - "tags" (array of lowercase single-word tokens)
+    Optionally: "summary", "tags_generated", other metadata.
+  - Exactly one of:
+      - "query_tags": array of lowercase single-word tags (may be empty)
+      - "query_text": free-text string (may be empty)
+    Exactly one of these will be non-empty.
 
-Constraints:
-- When computing tag_match_fraction use: (# matched tags) / (# query tags). If query_tags is empty, treat fraction as 0.
-- Keep matched_tags ≤ number of api tags.
-- If query_text was provided, include "query_tags_inferred" at top-level (array of inferred tags).
-- Use only the supplied dataset and query to decide matches. If you estimate semantic or meta values, keep them conservative (0.0-0.6) unless strong textual evidence exists.
+GOAL
+Return up to 5 best-matching APIs in strict JSON. Use tag matches first, supplement conservatively with semantic/meta signals (only estimate semantic/meta values when actual signals are not available). Be deterministic and explainable.
+
+STEP A — IF query_text PROVIDED
+1. Infer up to 5 canonical single-word technical tags from query_text.
+   - Lowercase, strip punctuation, remove stopwords and generic tokens: 
+     ["api", "data", "example", "demo", "service", "endpoint", "resource", "system", "json"].
+   - Canonicalize plurals and common aliases (payments→payment, txn→transaction, acct→account, names→name).
+   - Detect multi-word phrases and convert to tokens if helpful (e.g., "account name" → "account_name") but final inferred tags must be single-word tokens.
+   - Never output fallback or background concepts (e.g., color, fruit, company names).
+   - If no meaningful tag remains, "query_tags_inferred" = [].
+   - Output them as top-level key "query_tags_inferred" (preserve order by importance).
+   - Use these inferred tags as the effective query tags for matching.
+
+STEP B — PREPARE MATCHING SET
+- Effective query tags = query_tags (if provided) else query_tags_inferred.
+- If effective query tags is empty, you may still return up to 5 APIs based on conservative semantic_estimate/meta_boost, but tag_match_fraction = 0.
+
+STEP C — MATCHING RULES
+- Find APIs where at least one token in API.tags intersects effective query tags → these are tag matches.
+- Also allow APIs to be included via conservative semantic_estimate (0.0–0.6) when textual evidence suggests similarity; label these "semantic" matches. If included solely by semantic, matched_tags = [].
+- Do NOT invent matches; matched_tags must only contain tags from the API record itself.
+
+STEP D — SCORING (0.0–1.0)
+For each candidate API compute:
+  tag_match_fraction = (# matched_tags) / (# effective query tags)    (if denominator is 0 → fraction = 0)
+  semantic_estimate in [0.0, 0.6] — use 0.0 if none; if you estimate >0, be conservative.
+  meta_boost in [0.0, 0.6] — based on presence/quality of summary/metadata; conservative estimates only.
+
+score_raw = 0.65 * tag_match_fraction + 0.25 * semantic_estimate + 0.10 * meta_boost
+score = clamp(score_raw, 0.0, 1.0)
+Round score to 3 decimal places.
+
+Match type:
+  - "tag" if matched via tags only,
+  - "semantic" if via semantic_estimate only,
+  - "both" if both tag matches and semantic evidence.
+
+STEP E — OUTPUT FORMAT (STRICT JSON ONLY)
+Return only this JSON object (no extra prose):
+
+{
+  // include this only when query_text provided
+  "query_tags_inferred": ["tag1","tag2"],
+
+  "results": [
+    {
+      "api_name": "string",
+      "matched_tags": ["tagA","tagB"],   // must be subset of api.tags (empty if semantic-only)
+      "tags": ["..."],                   // API's full tags array
+      "summary": "string",               // empty string if not present
+      "match_type": "tag" | "semantic" | "both",
+      "score": 0.000,
+      "why": "short <=20-word sentence explaining the match and reason (mention matched tags or conservative semantic justification)"
+    },
+    ...
+  ]
+}
+
+RESULT RULES
+- Return at most 5 API objects sorted by score descending.
+- matched_tags length must be ≤ len(api.tags) and preserve API tag order.
+- If both query_tags and query_text are empty: return {"results": []}.
+- If effective query tags is empty but you return APIs via semantic/meta, set tag_match_fraction = 0 and be conservative (semantic_estimate ≤ 0.6).
+- If you include non-zero semantic_estimate or meta_boost, justify briefly in the "why" sentence (stay within 20 words).
+- If no APIs match by tags and semantic_estimate = 0 for all, return {"results": []}.
+- Round numeric scores to 3 decimals.
+
+EDGE CASES & CLARIFICATIONS
+- Detect exclusions in query_text (phrases like "not X", "without X", "exclude X") and treat them as filters — exclude APIs containing that tag.
+- For ambiguous or generic short queries (e.g., "need api"), remove all generic tokens and return empty inferred tags.
+- If user requests "single API" or "one call" and no single API covers all effective tags, still return top matches but include in "why" that a composite solution is needed.
+- Never output speculative meanings (like fruit, color, or brand) unless explicitly stated.
+- Be deterministic, minimal, and clean — no filler words or speculative tags.
+
+CONFIDENCE GUIDANCE
+- Scores near 0.8–1.0 indicate strong relevance.
+- 0.5–0.7 indicates partial fit; consider composite set.
+- <0.4 indicates weak or ambiguous match.
+
+FINAL: Output only the JSON described above — nothing else.
+Query : 
 """
 
 # ==== HELPERS ====
@@ -88,7 +161,12 @@ def extract_response_text(resp):
 # ==== ROUTES ====
 @app.route("/", methods=["GET"])
 def home():
-    return jsonify(status="ok", message="POST /enrich with {'query': '...', or 'tags': [...]}")
+    #read the payloaf ==d file and return ot the client'
+    with open("payload.json", "r") as f:
+        data = json.load(f)
+    return jsonify(data)
+
+    #return jsonify(status="ok", message="POST /enrich with {'query': '...', or 'tags': [...]}")
 
 @app.route("/enrich", methods=["POST"])
 def enrich():
@@ -108,13 +186,13 @@ def enrich():
         "query_tags": query_tags if query_tags else []
     }
 
-    prompt = PROMPT_INSTRUCTIONS + "\n" + json.dumps(structured_input, ensure_ascii=False)
+    prompt = PROMPT_INSTRUCTIONS + json.dumps(structured_input, ensure_ascii=False)
 
     try:
         resp = client.responses.create(
             model=MODEL,
             input=prompt,
-            temperature=0.0,
+            reasoning={"effort": "minimal"},
             max_output_tokens=1200,
         )
 

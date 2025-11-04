@@ -2,211 +2,369 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>AI-Powered API Search</title>
+  <title>AI-Powered API Catalog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, system-ui;
-      background: #f9fafb;
-      color: #111827;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    body { margin:0; font-family:"Segoe UI", Roboto, system-ui; background:#f9fafb; color:#111827; min-height:100vh; }
+    /* Header */
+    header { background:#42145F; padding:18px 40px; display:flex; align-items:center; gap:20px; box-shadow:0 6px 10px rgba(0,0,0,0.1); }
+    header img { height:90px; width:190px; object-fit:contain; border-radius:8px; }
+    header h1 { font-size:1.6rem; color:#fff; margin:0; }
+    nav { margin-left:auto; display:flex; gap:10px; align-items:center; }
+    .tab { color:#fff; opacity:0.85; padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
+    .tab.active { background: rgba(255,255,255,0.12); opacity:1; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.06); }
 
-    /* ===== Header ===== */
-    header {
-      background: #42145F; /* Scarlet Gum */
-      padding: 18px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 20px;
-      box-shadow: 0 6px 10px rgba(0,0,0,0.1);
-    }
-    header img {
-      height: 90px; /* Bigger image */
-      width: 190px;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 600;
-      margin: 0;
-      color: #FFFFFF;
-      letter-spacing: 0.5px;
-    }
+    main { padding:30px 20px 60px; display:flex; flex-direction:column; align-items:center; gap:20px; }
 
-    /* ===== Main layout ===== */
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 60px 16px;
-    }
+    /* SEARCH / RECOMMENDATION BOX (Bondi border + Brick button inside) */
+    .search-container { width:100%; max-width:880px; background:#fff; border-radius:14px; padding:18px; border:2px solid #009FAC; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+    .search-textarea { width:100%; min-height:90px; max-height:260px; padding:12px; border-radius:10px; border:none; background:#f1f5f9; font-size:1rem; resize:vertical; line-height:1.4; }
+    .search-actions { display:flex; gap:12px; margin-top:12px; align-items:center; }
+    .btn { background:#CE3B57; color:#fff; padding:10px 24px; border-radius:9999px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 14px rgba(0,0,0,0.07); }
+    .btn:hover { transform:translateY(-2px); }
 
-    /* ===== Search box ===== */
-    .search-container {
-      display: flex;
-      flex-direction: column; /* button will sit under textarea inside same rounded container */
-      align-items: stretch;
-      background: #FFFFFF;
-      border-radius: 30px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-      padding: 18px;
-      width: 100%;
-      max-width: 720px;
-      border: 2px solid #009FAC; /* Bondi Blue outline */
+    /* Spinner */
+    .spinner-inline {
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      border:3px solid rgba(0,0,0,0.12);
+      border-top-color: #009FAC; /* Bondi Blue accent */
+      animation: spin 1s linear infinite;
+      display:inline-block;
+      vertical-align:middle;
+      margin-right:8px;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* multiline textarea with wrapping */
-    .search-container textarea {
-      resize: vertical;
-      border: none;
-      outline: none;
-      font-size: 1rem;
-      padding: 14px 16px;
-      border-radius: 14px;
-      color: #111827;
-      background: #f1f5f9;
-      margin-bottom: 12px;
-      min-height: 90px;
-      max-height: 260px;
-      line-height: 1.5;
-      overflow-y: auto;
-      white-space: pre-wrap; /* allow wrapping */
-      word-wrap: break-word;
-    }
+    /* content layout */
+    .content { width:100%; max-width:1100px; display:flex; gap:22px; align-items:flex-start; justify-content:center; }
+    .left-col { width:100%; }
+    .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:18px; }
 
-    /* center the button but keep it inside the same curved box */
-    .search-container .btn-row {
-      display: flex;
-      justify-content: center;
-      margin-top: 6px;
-    }
-    .search-container button {
-      background: #42145F; /* Brick Red */
-      color: #FFFFFF;
-      border: none;
-      padding: 13px 28px;
-      border-radius: 9999px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.08s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-    .search-container button:hover {
-      background: #b12f48;
-      transform: translateY(-1px);
-    }
+    /* API card */
+    .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(11,18,32,0.06); border-left:6px solid #009FAC; display:flex; flex-direction:column; gap:8px; }
+    .card h3 { margin:0 0 6px 0; font-size:1.05rem; color:#0f172a; word-break:break-word; }
+    .meta { font-size:0.9rem; color:#475569; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .tag { background:#f1f5f9; padding:4px 8px; border-radius:999px; font-size:0.8rem; color:#0f172a; display:inline-block; margin-right:6px; margin-top:6px;}
+    .badge { background:#009FAC; color:#fff; padding:4px 8px; border-radius:999px; font-weight:700; font-size:0.85rem; }
 
-    /* ===== Status + Result ===== */
-    .status {
-      margin-top: 18px;
-      color: #475569;
-      font-size: 0.95rem;
-    }
-    .result-section {
-      width: 100%;
-      max-width: 920px;
-      margin-top: 28px;
-      display: none; /* hidden until response */
-    }
-    pre {
-      background: #0b1220;
-      color: #e6eef8;
-      padding: 14px;
-      border-radius: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      border-left: 4px solid #009FAC; /* accent stripe */
-    }
+    .small { font-size:0.85rem; color:#6b7280; }
+    .summary { margin:8px 0; color:#111827; line-height:1.5; }
 
-    /* small responsive tweaks */
-    @media (max-width: 760px) {
-      header { padding: 12px 18px; gap: 12px; }
-      header img { height: 64px; width: 140px; }
-      .search-container { padding: 14px; max-width: 92%; }
-    }
+    /* usage panel */
+    .usage-toggle { margin-top:8px; color:#0f172a; font-weight:700; cursor:pointer; text-decoration:underline; font-size:0.95rem; background:transparent; border:none; padding:0; }
+    .usage-panel { margin-top:8px; padding:12px; border-radius:8px; background:#fff; border:1px solid #e6eef6; display:none; white-space:pre-wrap; font-family:monospace; font-size:0.95rem; color:#0b1220; line-height:1.5; }
+    .usage-panel pre { background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #eee; white-space:pre-wrap; line-height:1.5; overflow:auto; }
+
+    /* results list for recommendations */
+    .result-card { background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 16px rgba(0,0,0,0.06); display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .result-left { flex:1; }
+    .result-score { min-width:72px; text-align:center; font-weight:700; color:#fff; border-radius:8px; padding:8px; background:#009FAC; }
+
+    /* helper */
+    .muted { color:#64748b; font-size:0.9rem; }
+    .link { color:#0f172a; text-decoration:none; font-weight:600; }
+    pre.out { background:#0b1220; color:#e6eef8; padding:16px; border-radius:8px; white-space:pre-wrap; line-height:1.6; font-size:0.95rem; overflow:auto; }
+
+    @media (max-width:900px) { header img{height:64px;width:120px;} header h1{font-size:1.1rem} .content{padding:0 12px} }
   </style>
 </head>
 <body>
   <header>
     <img src="assets/NatWest/nwb_white.svg" alt="NatWest Logo">
-    <h1>AI-Powered API Recommendation</h1>
+    <h1>AI-Powered API Catalog</h1>
+
+    <nav>
+      <div id="tabHome" class="tab active">Home</div>
+      <div id="tabRec" class="tab">Recommendations</div>
+    </nav>
   </header>
 
   <main>
-    <div class="search-container">
-      <!-- textarea supports multi-line paragraphs and word-wrap -->
-      <textarea id="query" placeholder="Type your API search / description here."></textarea>
+    <div class="content">
+      <div class="left-col">
 
-      <div class="btn-row">
-        <button id="searchBtn">Search</button>
+        <!-- HOME view -->
+        <div id="viewHome">
+          <div style="display:flex; justify-content:space-between; align-items:center; max-width:1100px; width:100%; margin-bottom:12px;">
+            <div>
+              <div class="muted">All registered APIs</div>
+              <h2 style="margin:6px 0 0 0">API index</h2>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button id="refreshBtn" class="btn" style="background:#42145F; padding:8px 16px; font-weight:700;">Refresh</button>
+            </div>
+          </div>
+
+          <div id="cards" class="cards">
+            <!-- api cards injected here -->
+          </div>
+        </div>
+
+        <!-- RECOMMENDATIONS view (hidden by default) -->
+        <div id="viewRec" style="display:none;">
+          <div style="max-width:1100px; width:100%;">
+            <div class="search-container">
+              <textarea id="recQuery" class="search-textarea" placeholder="Describe what you need (paragraphs allowed)."></textarea>
+              <div class="search-actions">
+                <button id="runRec" class="btn">Run Recommendation</button>
+                <div id="recStatus" class="muted" style="margin-left:12px; display:flex; align-items:center;"></div>
+              </div>
+            </div>
+
+            <div id="recResults" style="margin-top:18px;">
+              <!-- recommendation cards inserted here -->
+            </div>
+          </div>
+        </div>
+
       </div>
-    </div>
-
-    <div class="status" id="status"></div>
-
-    <div class="result-section" id="resultSection">
-      <pre id="out"></pre>
     </div>
   </main>
 
 <script>
-const API_URL = "http://127.0.0.1:3000/enrich";
-const textarea = document.getElementById('query');
-const out = document.getElementById('out');
-const status = document.getElementById('status');
-const resultSection = document.getElementById('resultSection');
-const btn = document.getElementById('searchBtn');
+/*
+  Frontend SPA logic:
+  - GET /all  -> returns { data: [...] } (list of APIs)
+  - POST /enrich -> existing enrichment endpoint
+*/
 
-// Submit on Enter (no shift). Allow Shift+Enter for newline.
-textarea.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    runSearch();
+// endpoints (use full local URLs)
+const ALL_URL = "http://127.0.0.1:3000/";
+const ENRICH_URL = "http://127.0.0.1:3000/enrich";
+
+// Tabs
+const tabHome = document.getElementById('tabHome');
+const tabRec = document.getElementById('tabRec');
+const viewHome = document.getElementById('viewHome');
+const viewRec = document.getElementById('viewRec');
+
+tabHome.addEventListener('click', () => { showView('home'); });
+tabRec.addEventListener('click', () => { showView('rec'); });
+
+function showView(which){
+  if(which === 'home'){
+    viewHome.style.display = '';
+    viewRec.style.display = 'none';
+    tabHome.classList.add('active');
+    tabRec.classList.remove('active');
+  } else {
+    viewHome.style.display = 'none';
+    viewRec.style.display = '';
+    tabHome.classList.remove('active');
+    tabRec.classList.add('active');
   }
-});
+}
 
-btn.addEventListener('click', runSearch);
+// load all APIs and render
+const cardsEl = document.getElementById('cards');
+const refreshBtn = document.getElementById('refreshBtn');
 
-async function runSearch() {
-  const query = textarea.value.trim();
-  if (!query) {
-    alert("Please enter a search term or description.");
-    textarea.focus();
+function makeLoadingNode(text = 'Loading…') {
+  const container = document.createElement('div');
+  container.style.display = 'flex';
+  container.style.alignItems = 'center';
+  container.style.gap = '10px';
+  container.className = 'muted';
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner-inline';
+  const t = document.createElement('span');
+  t.textContent = text;
+  container.appendChild(spinner);
+  container.appendChild(t);
+  return container;
+}
+
+async function fetchAll(){
+  cardsEl.innerHTML = '';
+  cardsEl.appendChild(makeLoadingNode('Loading APIs…'));
+  try {
+    const r = await fetch(ALL_URL, { cache: 'no-store' });
+    if(!r.ok) throw new Error(await r.text());
+    const payload = await r.json();
+    const data = payload.data || [];
+    renderCards(data);
+  } catch (err) {
+    cardsEl.innerHTML = '';
+    const n = document.createElement('div');
+    n.className = 'muted';
+    n.innerHTML = `Failed to load APIs: ${escapeHtml(err.message)}`;
+    cardsEl.appendChild(n);
+  }
+}
+
+function renderCards(list){
+  if(!Array.isArray(list) || list.length === 0){
+    cardsEl.innerHTML = '<div class="muted">No APIs found.</div>';
     return;
   }
+  cardsEl.innerHTML = '';
+  list.forEach(api => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const name = api.api_name || '—';
+    const summary = api.summary || api.description || '';
+    const owner = api.owner || '—';
+    const rating = (api.rating!==undefined)? api.rating : '—';
+    const tags = Array.isArray(api.tags) ? api.tags : [];
+    const created = api.created_at || api.created || '—';
+    const updated = api.updated_at || api.updated || '—';
+    const swaggerHref = api.swagger || api.documentation || '#';
+    const exampleRequest = api.example_request ? JSON.stringify(api.example_request, null, 2) : (api.example_request || '');
+    const predictedResponse = api.predicted_response_shape ? JSON.stringify(api.predicted_response_shape, null, 2) : (api.predicted_response_shape || '');
 
-  out.textContent = "";
-  resultSection.style.display = "none";
-  status.textContent = "Searching...";
+    // clickable toggle ID
+    const usageId = 'usage_' + Math.random().toString(36).slice(2,9);
 
-  try {
-    const payload = { query };
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+        <div style="flex:1">
+          <h3><a class="link" href="${escapeHtml(swaggerHref)}" target="_blank" rel="noreferrer">${escapeHtml(name)}</a></h3>
+          <div class="meta">
+            <div class="small">Owner: <strong>${escapeHtml(owner)}</strong></div>
+            <div class="small">Updated: ${escapeHtml(updated)}</div>
+            <div class="small">Created: ${escapeHtml(created)}</div>
+            <div style="margin-left:6px;"><span class="badge">${escapeHtml(rating)}</span></div>
+          </div>
+          <p class="summary">${escapeHtml(summary)}</p>
+          <div style="margin-top:8px;">${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>
+
+          <div style="margin-top:8px;">
+            <button class="usage-toggle" data-target="${usageId}">Show usage / Swagger</button>
+            <div id="${usageId}" class="usage-panel">
+              ${api.documentation ? `<div><strong>Documentation:</strong> <a href="${escapeHtml(api.documentation)}" target="_blank">${escapeHtml(api.documentation)}</a></div><br/>` : ''}
+              ${api.swagger ? `<div><strong>Swagger:</strong> <a href="${escapeHtml(api.swagger)}" target="_blank">${escapeHtml(api.swagger)}</a></div><br/>` : ''}
+              ${exampleRequest ? `<div><strong>Example request:</strong>\n<pre>${escapeHtml(exampleRequest)}</pre></div>` : ''}
+              ${predictedResponse ? `<div style="margin-top:8px;"><strong>Predicted response shape:</strong>\n<pre>${escapeHtml(predictedResponse)}</pre></div>` : ''}
+              ${(!api.documentation && !api.swagger && !exampleRequest && !predictedResponse) ? '<div class="muted">No usage details available.</div>' : ''}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+    cardsEl.appendChild(card);
+  });
+
+  // attach toggle listeners
+  document.querySelectorAll('.usage-toggle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = btn.getAttribute('data-target');
+      const panel = document.getElementById(id);
+      if(!panel) return;
+      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+      btn.textContent = panel.style.display === 'block' ? 'Hide usage / Swagger' : 'Show usage / Swagger';
     });
+  });
+}
 
-    const text = await res.text();
-    if (!res.ok) throw new Error(text || res.statusText);
+// small escaping to avoid injection when rendering names/links
+function escapeHtml(s){
+  if(s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 
-    const data = JSON.parse(text);
-    out.textContent = JSON.stringify(data, null, 2);
-    resultSection.style.display = "block"; // show results only after response
-    status.textContent = "✅ Found " + (data.total_matches ?? 0) + " result(s)";
-  } catch (err) {
-    status.textContent = "❌ Error: " + err.message;
-    resultSection.style.display = "none";
+// refresh button
+refreshBtn.addEventListener('click', fetchAll);
+
+// initial load
+fetchAll();
+
+
+// ---------------- Recommendations view ----------------
+const runRecBtn = document.getElementById('runRec');
+const recQuery = document.getElementById('recQuery');
+const recStatus = document.getElementById('recStatus');
+const recResults = document.getElementById('recResults');
+
+if(runRecBtn){
+  runRecBtn.addEventListener('click', runRec);
+}
+if(recQuery){
+  recQuery.addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runRec(); } });
+}
+
+// helper to show spinner + text
+function showRecLoading(text = 'Searching…') {
+  recStatus.innerHTML = '';
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner-inline';
+  const t = document.createElement('span');
+  t.textContent = text;
+  recStatus.appendChild(spinner);
+  recStatus.appendChild(t);
+}
+
+function hideRecLoading() {
+  recStatus.innerHTML = '';
+}
+
+async function runRec(){
+  const q = recQuery.value.trim();
+  if(!q){ alert('Please enter a description or query'); recQuery.focus(); return; }
+  showRecLoading('Searching…');
+  recResults.innerHTML = '';
+  try {
+    const r = await fetch(ENRICH_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ query: q })
+    });
+    const text = await r.text();
+    if(!r.ok) throw new Error(text || r.statusText);
+    const payload = JSON.parse(text);
+    const results = payload.results || [];
+    renderRecResults(results);
+    hideRecLoading();
+    recStatus.textContent = `Found ${results.length} result(s)`;
+    // switch to recommendations view (in case user called from URL)
+    showView('rec');
+  } catch(err){
+    hideRecLoading();
+    recStatus.textContent = `Error: ${err.message}`;
   }
+}
+
+function renderRecResults(results){
+  if(!Array.isArray(results) || results.length === 0){
+    recResults.innerHTML = '<div class="muted">No recommendations found.</div>';
+    return;
+  }
+  recResults.innerHTML = '';
+  results.forEach(r => {
+    const rc = document.createElement('div');
+    rc.className = 'result-card';
+    const left = document.createElement('div');
+    left.className = 'result-left';
+    const title = `<div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                     <div><a class="link" href="${escapeHtml(r.api_name)}" target="_blank">${escapeHtml(r.api_name)}</a></div>
+                     <div class="muted small">${escapeHtml(r.match_type || '')}</div>
+                   </div>`;
+    const summary = `<div class="small" style="margin-top:6px; line-height:1.5;">${escapeHtml(r.summary || '')}</div>`;
+    const tags = (Array.isArray(r.matched_tags) && r.matched_tags.length) ? `<div style="margin-top:8px">${r.matched_tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>` : '';
+    const why = r.why ? `<div class="muted small" style="margin-top:8px">Why: ${escapeHtml(r.why)}</div>` : '';
+    left.innerHTML = title + summary + tags + why;
+
+    const scoreBox = document.createElement('div');
+    scoreBox.className = 'result-score';
+    scoreBox.textContent = (typeof r.score === 'number') ? r.score.toFixed(2) : (r.score || '—');
+
+    rc.appendChild(left);
+    rc.appendChild(scoreBox);
+    recResults.appendChild(rc);
+  });
+}
+
+// Optional: Show recommendations view on load if a query param ?rec=1 is present
+if(location.search.includes('rec=1')) {
+  showView('rec');
 }
 </script>
 </body>
