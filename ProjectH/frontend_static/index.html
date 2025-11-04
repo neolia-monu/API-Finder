@@ -33,7 +33,7 @@
       border-radius: 8px;
     }
     header h1 {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       font-weight: 600;
       margin: 0;
       color: #FFFFFF;
@@ -50,36 +50,55 @@
       padding: 60px 16px;
     }
 
-    /* ===== Search bar ===== */
+    /* ===== Search box ===== */
     .search-container {
       display: flex;
-      align-items: center;
+      flex-direction: column; /* button will sit under textarea inside same rounded container */
+      align-items: stretch;
       background: #FFFFFF;
-      border-radius: 9999px;
+      border-radius: 30px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-      padding: 12px 20px;
+      padding: 18px;
       width: 100%;
-      max-width: 550px;
+      max-width: 720px;
       border: 2px solid #009FAC; /* Bondi Blue outline */
     }
-    .search-container input {
-      flex: 1;
+
+    /* multiline textarea with wrapping */
+    .search-container textarea {
+      resize: vertical;
       border: none;
       outline: none;
       font-size: 1rem;
-      padding: 16px 20px;
-      border-radius: 9999px;
+      padding: 14px 16px;
+      border-radius: 14px;
       color: #111827;
+      background: #f1f5f9;
+      margin-bottom: 12px;
+      min-height: 90px;
+      max-height: 260px;
+      line-height: 1.5;
+      overflow-y: auto;
+      white-space: pre-wrap; /* allow wrapping */
+      word-wrap: break-word;
+    }
+
+    /* center the button but keep it inside the same curved box */
+    .search-container .btn-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 6px;
     }
     .search-container button {
       background: #42145F; /* Brick Red */
       color: #FFFFFF;
       border: none;
-      padding: 18px 24px;
+      padding: 13px 28px;
       border-radius: 9999px;
-      font-weight: 600;
+      font-weight: 800;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      transition: background 0.2s, transform 0.08s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
     .search-container button:hover {
       background: #b12f48;
@@ -88,14 +107,14 @@
 
     /* ===== Status + Result ===== */
     .status {
-      margin-top: 20px;
+      margin-top: 18px;
       color: #475569;
       font-size: 0.95rem;
     }
     .result-section {
       width: 100%;
-      max-width: 720px;
-      margin-top: 30px;
+      max-width: 920px;
+      margin-top: 28px;
       display: none; /* hidden until response */
     }
     pre {
@@ -107,18 +126,29 @@
       white-space: pre-wrap;
       border-left: 4px solid #009FAC; /* accent stripe */
     }
+
+    /* small responsive tweaks */
+    @media (max-width: 760px) {
+      header { padding: 12px 18px; gap: 12px; }
+      header img { height: 64px; width: 140px; }
+      .search-container { padding: 14px; max-width: 92%; }
+    }
   </style>
 </head>
 <body>
   <header>
-    <img src="assets/NatWest/nwb_white.svg" alt="API Logo">
+    <img src="assets/NatWest/nwb_white.svg" alt="NatWest Logo">
     <h1>AI-Powered API Recommendation</h1>
   </header>
 
   <main>
     <div class="search-container">
-      <input id="query" type="text" placeholder="Search APIs (e.g., demo apis related to example resource)">
-      <button id="searchBtn">Search</button>
+      <!-- textarea supports multi-line paragraphs and word-wrap -->
+      <textarea id="query" placeholder="Type your API search / description here."></textarea>
+
+      <div class="btn-row">
+        <button id="searchBtn">Search</button>
+      </div>
     </div>
 
     <div class="status" id="status"></div>
@@ -130,18 +160,27 @@
 
 <script>
 const API_URL = "http://127.0.0.1:3000/enrich";
-const queryInput = document.getElementById('query');
+const textarea = document.getElementById('query');
 const out = document.getElementById('out');
 const status = document.getElementById('status');
 const resultSection = document.getElementById('resultSection');
+const btn = document.getElementById('searchBtn');
 
-document.getElementById('searchBtn').addEventListener('click', runSearch);
-queryInput.addEventListener('keypress', e => { if (e.key === 'Enter') runSearch(); });
+// Submit on Enter (no shift). Allow Shift+Enter for newline.
+textarea.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    runSearch();
+  }
+});
+
+btn.addEventListener('click', runSearch);
 
 async function runSearch() {
-  const query = queryInput.value.trim();
+  const query = textarea.value.trim();
   if (!query) {
-    alert("Please enter a search term.");
+    alert("Please enter a search term or description.");
+    textarea.focus();
     return;
   }
 
