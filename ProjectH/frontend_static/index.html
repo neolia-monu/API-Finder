@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AI-Powered API Search</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, system-ui;
+      background: #f9fafb;
+      color: #111827;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #42145F; /* grey header */
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    header img {
+      height: 40px;
+      width: 40px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      color: #111827;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 8px 16px;
+      width: 100%;
+      max-width: 550px;
+    }
+    .search-container input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      padding: 10px 14px;
+      border-radius: 9999px;
+    }
+    .search-container button {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .search-container button:hover {
+      background: #0369a1;
+    }
+    .status {
+      margin-top: 20px;
+      color: #475569;
+    }
+    .result-section {
+      width: 100%;
+      max-width: 720px;
+      margin-top: 30px;
+      display: none; /* hidden until response */
+    }
+    pre {
+      background: #0b1220;
+      color: #e6eef8;
+      padding: 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="assets/nwg_logo.webp" alt="API Logo">
+    <h1>AI-Powered API Recommendation</h1>
+  </header>
+
+  <main>
+    <div class="search-container">
+      <input id="query" type="text" placeholder="Search APIs (e.g., demo apis related to example resource)">
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="result-section" id="resultSection">
+      <pre id="out"></pre>
+    </div>
+  </main>
+
+<script>
+const API_URL = "http://127.0.0.1:3000/enrich";
+const queryInput = document.getElementById('query');
+const out = document.getElementById('out');
+const status = document.getElementById('status');
+const resultSection = document.getElementById('resultSection');
+
+document.getElementById('searchBtn').addEventListener('click', runSearch);
+queryInput.addEventListener('keypress', e => { if (e.key === 'Enter') runSearch(); });
+
+async function runSearch() {
+  const query = queryInput.value.trim();
+  if (!query) {
+    alert("Please enter a search term.");
+    return;
+  }
+
+  out.textContent = "";
+  resultSection.style.display = "none";
+  status.textContent = "Searching...";
+
+  try {
+    const payload = { query };
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || res.statusText);
+
+    const data = JSON.parse(text);
+    out.textContent = JSON.stringify(data, null, 2);
+    resultSection.style.display = "block"; // show response block
+    status.textContent = "✅ Found " + (data.total_matches ?? 0) + " result(s)";
+  } catch (err) {
+    status.textContent = "❌ Error: " + err.message;
+    resultSection.style.display = "none";
+  }
+}
+</script>
+</body>
+</html>
