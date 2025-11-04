@@ -15,69 +15,82 @@
       flex-direction: column;
       min-height: 100vh;
     }
+
+    /* ===== Header ===== */
     header {
-      background: #42145F; /* grey header */
-      padding: 14px 40px;
+      background: #42145F; /* Scarlet Gum */
+      padding: 18px 40px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      gap: 20px;
+      box-shadow: 0 6px 10px rgba(0,0,0,0.1);
     }
     header img {
-      height: 40px;
-      width: 40px;
+      height: 90px; /* Bigger image */
+      width: 190px;
       object-fit: contain;
       border-radius: 8px;
     }
     header h1 {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       font-weight: 600;
       margin: 0;
-      color: #111827;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
     }
+
+    /* ===== Main layout ===== */
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 16px;
+      padding: 60px 16px;
     }
+
+    /* ===== Search bar ===== */
     .search-container {
       display: flex;
       align-items: center;
-      background: white;
+      background: #FFFFFF;
       border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 8px 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      padding: 12px 20px;
       width: 100%;
       max-width: 550px;
+      border: 2px solid #009FAC; /* Bondi Blue outline */
     }
     .search-container input {
       flex: 1;
       border: none;
       outline: none;
       font-size: 1rem;
-      padding: 10px 14px;
+      padding: 16px 20px;
       border-radius: 9999px;
+      color: #111827;
     }
     .search-container button {
-      background: #0284c7;
-      color: white;
+      background: #42145F; /* Brick Red */
+      color: #FFFFFF;
       border: none;
-      padding: 10px 22px;
+      padding: 18px 24px;
       border-radius: 9999px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
     .search-container button:hover {
-      background: #0369a1;
+      background: #b12f48;
+      transform: translateY(-1px);
     }
+
+    /* ===== Status + Result ===== */
     .status {
       margin-top: 20px;
       color: #475569;
+      font-size: 0.95rem;
     }
     .result-section {
       width: 100%;
@@ -88,16 +101,17 @@
     pre {
       background: #0b1220;
       color: #e6eef8;
-      padding: 12px;
-      border-radius: 6px;
+      padding: 14px;
+      border-radius: 10px;
       overflow-x: auto;
       white-space: pre-wrap;
+      border-left: 4px solid #009FAC; /* accent stripe */
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="assets/nwg_logo.webp" alt="API Logo">
+    <img src="assets/NatWest/nwb_white.svg" alt="API Logo">
     <h1>AI-Powered API Recommendation</h1>
   </header>
 
@@ -148,7 +162,7 @@ async function runSearch() {
 
     const data = JSON.parse(text);
     out.textContent = JSON.stringify(data, null, 2);
-    resultSection.style.display = "block"; // show response block
+    resultSection.style.display = "block"; // show results only after response
     status.textContent = "✅ Found " + (data.total_matches ?? 0) + " result(s)";
   } catch (err) {
     status.textContent = "❌ Error: " + err.message;
