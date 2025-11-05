@@ -18,11 +18,36 @@
     main { padding:30px 20px 60px; display:flex; flex-direction:column; align-items:center; gap:20px; }
 
     /* SEARCH / RECOMMENDATION BOX (Bondi border + Brick button inside) */
-    .search-container { width:100%; max-width:880px; background:#fff; border-radius:14px; padding:18px; border:2px solid #009FAC; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+    .search-container { width:100%; max-width:880px; background:#fff; border-radius:14px; padding:18px; border:2px solid #42145F; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
     .search-textarea { width:100%; min-height:90px; max-height:260px; padding:12px; border-radius:10px; border:none; background:#f1f5f9; font-size:1rem; resize:vertical; line-height:1.4; }
     .search-actions { display:flex; gap:12px; margin-top:12px; align-items:center; }
-    .btn { background:#CE3B57; color:#fff; padding:10px 24px; border-radius:9999px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 14px rgba(0,0,0,0.07); }
+    .btn { background: #42145F; color:#fff; padding:13px 24px; border-radius:9999px; border:none; cursor:pointer; font-weight:800; box-shadow:0 6px 14px rgba(0,0,0,0.07); }
     .btn:hover { transform:translateY(-2px); }
+
+    /* Recommendation Results Styling */
+#recResults {
+  margin-top: 28px;
+  padding: 10px 0 40px 0; /* Adds space above and below results */
+  width: 100%;
+  max-width: 950px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* spacing between each card */
+}
+
+/* Each result card spacing and structure */
+.result-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 20px; /* more inner padding */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  margin: 5px 0px;
+  justify-content: space-between;
+  gap: 18px; /* adds spacing between left & right (score) sections */
+  align-items: flex-start;
+  line-height: 1.6; /* better text readability */
+}
 
     /* Spinner */
     .spinner-inline {
@@ -44,24 +69,51 @@
     .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:18px; }
 
     /* API card */
-    .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(11,18,32,0.06); border-left:6px solid #009FAC; display:flex; flex-direction:column; gap:8px; }
+    /* Make the API list vertical (one long card per row) */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Make each card stack its sections vertically */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(11,18,32,0.06);
+  border-left: 6px solid #42145F;
+  display: flex;
+  flex-direction: column;    /* stack content vertically */
+  gap: 10px;
+}
+
+/* Ensure headings and meta are full-width and wrap nicely */
+.card h3 { margin: 0 0 8px 0; font-size:1.05rem; color:#0f172a; word-break:break-word; }
+.card .meta { width: 100%; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.card .summary { margin: 8px 0; color:#111827; line-height:1.6; }
+
+/* Make usage panel full width */
+.usage-panel { width: 100%; box-sizing: border-box; }
+
+    /*.card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(11,18,32,0.06); border-left:6px solid #009FAC; display:flex; flex-direction:column; gap:8px; }
     .card h3 { margin:0 0 6px 0; font-size:1.05rem; color:#0f172a; word-break:break-word; }
-    .meta { font-size:0.9rem; color:#475569; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .meta { font-size:0.9rem; color:#475569; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }*/
     .tag { background:#f1f5f9; padding:4px 8px; border-radius:999px; font-size:0.8rem; color:#0f172a; display:inline-block; margin-right:6px; margin-top:6px;}
-    .badge { background:#009FAC; color:#fff; padding:4px 8px; border-radius:999px; font-weight:700; font-size:0.85rem; }
+    .badge { background:#42145F; color:#fff; padding:4px 8px; border-radius:999px; font-weight:700; font-size:0.85rem; }
 
     .small { font-size:0.85rem; color:#6b7280; }
-    .summary { margin:8px 0; color:#111827; line-height:1.5; }
+    /*.summary { margin:8px 0; color:#111827; line-height:1.5; }*/
 
     /* usage panel */
     .usage-toggle { margin-top:8px; color:#0f172a; font-weight:700; cursor:pointer; text-decoration:underline; font-size:0.95rem; background:transparent; border:none; padding:0; }
-    .usage-panel { margin-top:8px; padding:12px; border-radius:8px; background:#fff; border:1px solid #e6eef6; display:none; white-space:pre-wrap; font-family:monospace; font-size:0.95rem; color:#0b1220; line-height:1.5; }
+    /*.usage-panel { margin-top:8px; padding:12px; border-radius:8px; background:#fff; border:1px solid #e6eef6; display:none; white-space:pre-wrap; font-family:monospace; font-size:0.95rem; color:#0b1220; line-height:1.5; }*/
     .usage-panel pre { background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #eee; white-space:pre-wrap; line-height:1.5; overflow:auto; }
 
     /* results list for recommendations */
     .result-card { background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 16px rgba(0,0,0,0.06); display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
     .result-left { flex:1; }
-    .result-score { min-width:72px; text-align:center; font-weight:700; color:#fff; border-radius:8px; padding:8px; background:#009FAC; }
+    .result-score { min-width:72px; text-align:center; font-weight:700; color:#fff; border-radius:8px; padding:8px; background:#42145F; }
 
     /* helper */
     .muted { color:#64748b; font-size:0.9rem; }
@@ -94,7 +146,7 @@
               <h2 style="margin:6px 0 0 0">API index</h2>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
-              <button id="refreshBtn" class="btn" style="background:#42145F; padding:8px 16px; font-weight:700;">Refresh</button>
+              <button id="refreshBtn" class="btn" style="background:#42145F; padding:8px 16px; font-weight:800;">Refresh</button>
             </div>
           </div>
 
@@ -132,7 +184,7 @@
 */
 
 // endpoints (use full local URLs)
-const ALL_URL = "http://127.0.0.1:3000/";
+const ALL_URL = "http://127.0.0.1:3000/ ";
 const ENRICH_URL = "http://127.0.0.1:3000/enrich";
 
 // Tabs
@@ -195,67 +247,114 @@ async function fetchAll(){
   }
 }
 
+// Convert ISO date → human readable (e.g., "June 15 2024 · 12:00 PM")
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return '—';
+  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  /*return d.toLocaleString('en-US', options).replace(',', ' ·');*/
+  return d.toLocaleString('en-US', { ...options, timeZone: 'UTC' });
+
+}
+
 function renderCards(list){
   if(!Array.isArray(list) || list.length === 0){
     cardsEl.innerHTML = '<div class="muted">No APIs found.</div>';
     return;
   }
   cardsEl.innerHTML = '';
+
   list.forEach(api => {
     const card = document.createElement('div');
     card.className = 'card';
+
     const name = api.api_name || '—';
     const summary = api.summary || api.description || '';
     const owner = api.owner || '—';
-    const rating = (api.rating!==undefined)? api.rating : '—';
+    const rating = (api.rating !== undefined) ? api.rating : '—';
     const tags = Array.isArray(api.tags) ? api.tags : [];
-    const created = api.created_at || api.created || '—';
-    const updated = api.updated_at || api.updated || '—';
+    const created = formatDate(api.created_at || api.created);
+    const updated = formatDate(api.updated_at || api.updated);  
     const swaggerHref = api.swagger || api.documentation || '#';
-    const exampleRequest = api.example_request ? JSON.stringify(api.example_request, null, 2) : (api.example_request || '');
-    const predictedResponse = api.predicted_response_shape ? JSON.stringify(api.predicted_response_shape, null, 2) : (api.predicted_response_shape || '');
+    const exampleRequest = api.example_request ? JSON.stringify(api.example_request, null, 2) : '';
+    const predictedResponse = api.predicted_response_shape ? JSON.stringify(api.predicted_response_shape, null, 2) : '';
 
-    // clickable toggle ID
     const usageId = 'usage_' + Math.random().toString(36).slice(2,9);
 
     card.innerHTML = `
-      <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-        <div style="flex:1">
-          <h3><a class="link" href="${escapeHtml(swaggerHref)}" target="_blank" rel="noreferrer">${escapeHtml(name)}</a></h3>
-          <div class="meta">
-            <div class="small">Owner: <strong>${escapeHtml(owner)}</strong></div>
-            <div class="small">Updated: ${escapeHtml(updated)}</div>
-            <div class="small">Created: ${escapeHtml(created)}</div>
-            <div style="margin-left:6px;"><span class="badge">${escapeHtml(rating)}</span></div>
-          </div>
-          <p class="summary">${escapeHtml(summary)}</p>
-          <div style="margin-top:8px;">${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>
+      <h3>API Name: <a class="link" href="${escapeHtml(swaggerHref)}" target="_blank" rel="noreferrer">${escapeHtml(name)}</a></h3>
 
-          <div style="margin-top:8px;">
-            <button class="usage-toggle" data-target="${usageId}">Show usage / Swagger</button>
-            <div id="${usageId}" class="usage-panel">
-              ${api.documentation ? `<div><strong>Documentation:</strong> <a href="${escapeHtml(api.documentation)}" target="_blank">${escapeHtml(api.documentation)}</a></div><br/>` : ''}
-              ${api.swagger ? `<div><strong>Swagger:</strong> <a href="${escapeHtml(api.swagger)}" target="_blank">${escapeHtml(api.swagger)}</a></div><br/>` : ''}
-              ${exampleRequest ? `<div><strong>Example request:</strong>\n<pre>${escapeHtml(exampleRequest)}</pre></div>` : ''}
-              ${predictedResponse ? `<div style="margin-top:8px;"><strong>Predicted response shape:</strong>\n<pre>${escapeHtml(predictedResponse)}</pre></div>` : ''}
-              ${(!api.documentation && !api.swagger && !exampleRequest && !predictedResponse) ? '<div class="muted">No usage details available.</div>' : ''}
-            </div>
-          </div>
+      <div class="meta">
+        <div class="small">Owner: <strong>${escapeHtml(owner)}</strong></div>
+        <div class="small">Updated: ${escapeHtml(updated)}</div>
+        <div class="small">Created: ${escapeHtml(created)}</div>
+        <div style="margin-left:auto;">Rating: <span class="badge">${escapeHtml(rating)}</span></div>
+      </div>
 
-        </div>
+      <p class="summary">Summary: ${escapeHtml(summary)}</p>
+
+      <div>Tags: ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>
+
+      <div style="margin-top:8px;">
+        <button class="usage-toggle" data-target="${usageId}">Show usage / Swagger</button>
+        <div id="${usageId}" class="usage-panel" aria-hidden="true"></div>
       </div>
     `;
-    cardsEl.appendChild(card);
-  });
 
-  // attach toggle listeners
-  document.querySelectorAll('.usage-toggle').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const id = btn.getAttribute('data-target');
-      const panel = document.getElementById(id);
-      if(!panel) return;
-      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
-      btn.textContent = panel.style.display === 'block' ? 'Hide usage / Swagger' : 'Show usage / Swagger';
+    cardsEl.appendChild(card);
+
+    // after injecting into DOM, attach data and listener to the toggle button
+    const btn = card.querySelector('.usage-toggle');
+    const panel = card.querySelector('.usage-panel');
+
+    // store usage data on the button (safe, not in DOM attributes)
+    btn._usage = {
+      documentation: api.documentation || '',
+      swagger: api.swagger || '',
+      exampleRequest,
+      predictedResponse
+    };
+
+    // Toggle handler: populate panel only on first open
+    btn.addEventListener('click', () => {
+      const isOpen = panel.style.display === 'block';
+      if (isOpen) {
+        panel.style.display = 'none';
+        panel.setAttribute('aria-hidden', 'true');
+        btn.textContent = 'Show usage / Swagger';
+        return;
+      }
+
+      // If panel empty, build content from stored data
+      if (!panel.innerHTML.trim()) {
+        const parts = [];
+        const u = btn._usage;
+
+        if (u.documentation) {
+          parts.push(`<div><strong>Documentation:</strong> <a href="${escapeHtml(u.documentation)}" target="_blank">${escapeHtml(u.documentation)}</a></div>`);
+        }
+        if (u.swagger) {
+          parts.push(`<div><strong>Swagger:</strong> <a href="${escapeHtml(u.swagger)}" target="_blank">${escapeHtml(u.swagger)}</a></div>`);
+        }
+        if (u.exampleRequest) {
+          parts.push(`<div style="margin-top:8px;"><strong>Example request:</strong><pre>${escapeHtml(u.exampleRequest)}</pre></div>`);
+        }
+        if (u.predictedResponse) {
+          parts.push(`<div style="margin-top:8px;"><strong>Predicted response shape:</strong><pre>${escapeHtml(u.predictedResponse)}</pre></div>`);
+        }
+
+        // If no parts, show message now (only visible after click)
+        if (parts.length === 0) {
+          parts.push('<div class="muted">No usage details available.</div>');
+        }
+
+        panel.innerHTML = parts.join('<br/>');
+      }
+
+      panel.style.display = 'block';
+      panel.setAttribute('aria-hidden', 'false');
+      btn.textContent = 'Hide usage / Swagger';
     });
   });
 }
@@ -344,10 +443,10 @@ function renderRecResults(results){
     const left = document.createElement('div');
     left.className = 'result-left';
     const title = `<div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-                     <div><a class="link" href="${escapeHtml(r.api_name)}" target="_blank">${escapeHtml(r.api_name)}</a></div>
-                     <div class="muted small">${escapeHtml(r.match_type || '')}</div>
+                     <div><a class="link" href="${escapeHtml(r.api_name)}" target="_blank">API name: ${escapeHtml(r.api_name)}</a></div>
+                     <div class="muted small">Match Type: ${escapeHtml(r.match_type || '')}</div>
                    </div>`;
-    const summary = `<div class="small" style="margin-top:6px; line-height:1.5;">${escapeHtml(r.summary || '')}</div>`;
+    const summary = `<div class="small" style="margin-top:6px; line-height:1.5;">Summary: ${escapeHtml(r.summary || '')}</div>`;
     const tags = (Array.isArray(r.matched_tags) && r.matched_tags.length) ? `<div style="margin-top:8px">${r.matched_tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>` : '';
     const why = r.why ? `<div class="muted small" style="margin-top:8px">Why: ${escapeHtml(r.why)}</div>` : '';
     left.innerHTML = title + summary + tags + why;
