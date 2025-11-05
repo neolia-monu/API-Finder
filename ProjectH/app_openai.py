@@ -3,6 +3,7 @@ import re
 import json
 import traceback
 import datetime
+import time
 from flask import Flask, request, jsonify
 from openai import OpenAI
 from flask_cors import CORS
@@ -161,6 +162,7 @@ def extract_response_text(resp):
 # ==== ROUTES ====
 @app.route("/", methods=["GET"])
 def home():
+    time.sleep(5)
     #read the payloaf ==d file and return ot the client'
     with open("payload.json", "r") as f:
         data = json.load(f)

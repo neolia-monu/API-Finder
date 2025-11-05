@@ -49,18 +49,42 @@
   line-height: 1.6; /* better text readability */
 }
 
-    /* Spinner */
+/* Centered loading container for APIs */
+.loading-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;              /* covers half of the page height */
+  text-align: center;
+  width: 100%;
+}
+
+.loading-center .spinner-inline {
+  width: 50px;
+  height: 50px;
+  border-width: 4px;
+  margin-bottom: 12px;
+}
+
+.loading-center span {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #42145F;            /* NatWest Scarlet Gum */
+}
+
+    /* Spinner*/
     .spinner-inline {
-      width:18px;
-      height:18px;
+      width: 50px;
+      height:50px;
       border-radius:50%;
       border:3px solid rgba(0,0,0,0.12);
-      border-top-color: #009FAC; /* Bondi Blue accent */
+      border-top-color:#42145F; 
       animation: spin 1s linear infinite;
       display:inline-block;
       vertical-align:middle;
       margin-right:8px;
-    }
+    } 
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* content layout */
@@ -166,6 +190,7 @@
               </div>
             </div>
 
+            <div id="search" class="muted" style="margin-top:18px;"></div>
             <div id="recResults" style="margin-top:18px;">
               <!-- recommendation cards inserted here -->
             </div>
@@ -214,20 +239,18 @@ function showView(which){
 const cardsEl = document.getElementById('cards');
 const refreshBtn = document.getElementById('refreshBtn');
 
-function makeLoadingNode(text = 'Loading…') {
+function makeLoadingNode(text = 'Loading APIs…') {
   const container = document.createElement('div');
-  container.style.display = 'flex';
-  container.style.alignItems = 'center';
-  container.style.gap = '10px';
-  container.className = 'muted';
+  container.className = 'loading-center'; // centered style
   const spinner = document.createElement('span');
   spinner.className = 'spinner-inline';
-  const t = document.createElement('span');
-  t.textContent = text;
+  const label = document.createElement('span');
+  label.textContent = text;
   container.appendChild(spinner);
-  container.appendChild(t);
+  container.appendChild(label);
   return container;
 }
+
 
 async function fetchAll(){
   cardsEl.innerHTML = '';
@@ -382,6 +405,7 @@ const runRecBtn = document.getElementById('runRec');
 const recQuery = document.getElementById('recQuery');
 const recStatus = document.getElementById('recStatus');
 const recResults = document.getElementById('recResults');
+const recSearch = document.getElementById('search');
 
 if(runRecBtn){
   runRecBtn.addEventListener('click', runRec);
@@ -392,18 +416,31 @@ if(recQuery){
 
 // helper to show spinner + text
 function showRecLoading(text = 'Searching…') {
-  recStatus.innerHTML = '';
+  recSearch.innerHTML = '';
+  recSearch.className = 'loading-center';
+  
   const spinner = document.createElement('span');
   spinner.className = 'spinner-inline';
-  const t = document.createElement('span');
-  t.textContent = text;
-  recStatus.appendChild(spinner);
-  recStatus.appendChild(t);
+  const label = document.createElement('span');
+  label.textContent = text;
+  
+  recSearch.appendChild(spinner);
+  recSearch.appendChild(label);
+
+  // Hide results during search
+  recResults.innerHTML = '';
+  recResults.style.display = 'none';
 }
 
+
 function hideRecLoading() {
+  recSearch.className = 'muted';
+  recSearch.innerHTML = '';
+  recResults.style.display = '';
+  recStatus.className = 'muted';
   recStatus.innerHTML = '';
 }
+
 
 async function runRec(){
   const q = recQuery.value.trim();
