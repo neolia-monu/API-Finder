@@ -58,6 +58,11 @@
   height: 70vh;              /* covers half of the page height */
   text-align: center;
   width: 100%;
+  grid-column: 1 / -1;              /* span across both columns */
+  justify-self: center;             /* horizontally center */
+  align-self: center;               /* vertically center if needed */
+  text-align: center;
+  width: 100%;
 }
 
 .loading-center .spinner-inline {
@@ -95,27 +100,85 @@
     /* API card */
     /* Make the API list vertical (one long card per row) */
 .cards {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* two cards side by side */
+  gap: 20px; /* spacing between the two cards */
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr; /* stack vertically on mobile */
+  }
 }
 
 /* Make each card stack its sections vertically */
 .card {
   background: #fff;
   border-radius: 12px;
-  padding: 18px;
+  padding: 20px;
   box-shadow: 0 6px 18px rgba(11,18,32,0.06);
   border-left: 6px solid #42145F;
   display: flex;
-  flex-direction: column;    /* stack content vertically */
+  flex-direction: column;
   gap: 10px;
 }
 
 /* Ensure headings and meta are full-width and wrap nicely */
-.card h3 { margin: 0 0 8px 0; font-size:1.05rem; color:#0f172a; word-break:break-word; }
-.card .meta { width: 100%; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-.card .summary { margin: 8px 0; color:#111827; line-height:1.6; }
+
+.card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.summary {
+  margin: 8px 0;
+  color: #111827;
+  line-height: 1.6;
+}
+
+.tag {
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #0f172a;
+  margin-right: 6px;
+  margin-top: 6px;
+}
+
+.usage-toggle {
+  margin-top: 8px;
+  color: #42145F;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.95rem;
+  background: transparent;
+  border: none;
+}
+
+.usage-panel pre {
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  overflow: auto;
+}
 
 /* Make usage panel full width */
 .usage-panel { width: 100%; box-sizing: border-box; }
@@ -123,16 +186,13 @@
     /*.card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(11,18,32,0.06); border-left:6px solid #009FAC; display:flex; flex-direction:column; gap:8px; }
     .card h3 { margin:0 0 6px 0; font-size:1.05rem; color:#0f172a; word-break:break-word; }
     .meta { font-size:0.9rem; color:#475569; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }*/
-    .tag { background:#f1f5f9; padding:4px 8px; border-radius:999px; font-size:0.8rem; color:#0f172a; display:inline-block; margin-right:6px; margin-top:6px;}
     .badge { background:#42145F; color:#fff; padding:4px 8px; border-radius:999px; font-weight:700; font-size:0.85rem; }
 
     .small { font-size:0.85rem; color:#6b7280; }
     /*.summary { margin:8px 0; color:#111827; line-height:1.5; }*/
 
     /* usage panel */
-    .usage-toggle { margin-top:8px; color:#0f172a; font-weight:700; cursor:pointer; text-decoration:underline; font-size:0.95rem; background:transparent; border:none; padding:0; }
     /*.usage-panel { margin-top:8px; padding:12px; border-radius:8px; background:#fff; border:1px solid #e6eef6; display:none; white-space:pre-wrap; font-family:monospace; font-size:0.95rem; color:#0b1220; line-height:1.5; }*/
-    .usage-panel pre { background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #eee; white-space:pre-wrap; line-height:1.5; overflow:auto; }
 
     /* results list for recommendations */
     .result-card { background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 16px rgba(0,0,0,0.06); display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }

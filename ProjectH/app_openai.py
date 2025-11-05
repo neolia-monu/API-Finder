@@ -221,12 +221,12 @@ def enrich():
         }
 
         # === Save nicely formatted to file ===
-        os.makedirs("outputs", exist_ok=True)
+        """os.makedirs("outputs", exist_ok=True)
         filename = f"outputs/output_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2, ensure_ascii=False)
 
-        print(f"💾 Saved output → {filename}")
+        print(f"💾 Saved output → {filename}")"""
 
         # === Return pretty JSON to client ===
         return app.response_class(

@@ -1,6 +1,71 @@
 {
     "data": [
         {
+            "api_name": "https://bank.example.com/api/v1/accounts",
+            "version": "v1",
+            "table_name": "account",
+            "summary": "Read-only endpoint that returns a customer's accounts (savings, checking, credit) with balances and status. Third parties must request the accounts:read scope.",
+            "owner": "Gourang",
+            "tags": ["accounts", "customer", "banking", "read-only"],
+            "created_at": "2024-06-15T12:00:00Z",
+            "updated_at": "2025-11-05T00:00:00Z",
+            "description": "Provides a list of accounts owned by an authenticated customer. Supports pagination and optional filters (type, status).",
+            "rating": 4.7,
+            "required_scopes": ["accounts:read"]
+        },
+        {
+            "api_name": "https://bank.example.com/api/v1/billing",
+            "version": "v1",
+            "table_name": "billing",
+            "summary": "Billing & statement API - returns recurring charges, invoices, and scheduled bill payments for a customer.",
+            "owner": "Gourang",
+            "tags": ["billing", "invoices", "statements", "recurring"],
+            "created_at": "2024-06-15T12:00:00Z",
+            "updated_at": "2025-11-05T00:00:00Z",
+            "description": "Used by authorized third parties to retrieve billing events and scheduled mandates for the customer (e.g., subscriptions, EMI schedules).",
+            "rating": 4.4,
+            "required_scopes": ["billing:read"]
+        },
+        {
+            "api_name": "https://bank.example.com/api/v1/payments",
+            "version": "v1",
+            "table_name": "payments",
+            "summary": "Create and query customer-initiated payments. Requires explicit user consent and payments:write or payments:read scopes.",
+            "owner": "Gourang",
+            "tags": ["payments", "initiate", "payouts", "authorization"],
+            "created_at": "2024-06-15T12:00:00Z",
+            "updated_at": "2025-11-05T00:00:00Z",
+            "description": "Endpoint to create a payment instruction (IMPS/NEFT/RTGS/UPI) on behalf of an authenticated customer and to query payment status.",
+            "rating": 4.6,
+            "required_scopes": ["payments:write", "payments:read"]
+        },
+        {
+            "api_name": "https://bank.example.com/api/v1/transactions",
+            "version": "v1",
+            "table_name": "transaction",
+            "summary": "Return a list of transactions (debits/credits) for a given account. Supports filtering by date, amount, and merchant.",
+            "owner": "Gourang",
+            "tags": ["transactions", "ledger", "history", "audit"],
+            "created_at": "2024-06-15T12:00:00Z",
+            "updated_at": "2025-11-05T00:00:00Z",
+            "description": "Transactions endpoint returns ledger entries for an account. Useful for reconciliation, categorization, and statement generation.",
+            "rating": 4.8,
+            "required_scopes": ["transactions:read"]
+        },
+        {
+            "api_name": "https://bank.example.com/api/v1/billing",
+            "version": "v1",
+            "table_name": "billing",
+            "summary": "Billing & statement API — returns recurring charges, invoices, and scheduled bill payments for a customer.",
+            "owner": "Gourang",
+            "tags": ["billing", "invoices", "statements", "recurring"],
+            "created_at": "2024-06-15T12:00:00Z",
+            "updated_at": "2025-11-05T00:00:00Z",
+            "description": "Used by authorized third parties to retrieve billing events and scheduled mandates for the customer (e.g., subscriptions, EMI schedules).",
+            "rating": 4.4,
+            "required_scopes": ["billing:read"]
+        },
+        {
             "api_name": "https://example.com/api/v1/resource",
             "summary": "It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
             "owner": "Gourang",
@@ -20,6 +85,7 @@
             "description": "This API endpoint serves as another demonstration example in the newfile.json.",
             "rating": 4.0
         },
+
         {
             "api_name": "https://yetanotherexample.com/api/v3/resource",
             "summary": "Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
