@@ -162,13 +162,11 @@ def extract_response_text(resp):
 # ==== ROUTES ====
 @app.route("/", methods=["GET"])
 def home():
-    time.sleep(5)
     #read the payloaf ==d file and return ot the client'
     with open("payload.json", "r") as f:
         data = json.load(f)
+    time.sleep(2)
     return jsonify(data)
-
-    #return jsonify(status="ok", message="POST /enrich with {'query': '...', or 'tags': [...]}")
 
 @app.route("/enrich", methods=["POST"])
 def enrich():

@@ -1,0 +1,351 @@
+* { 
+  box-sizing: border-box; 
+}
+    
+body { 
+  margin:0; 
+  font-family:"Segoe UI", Roboto, system-ui; 
+  background:#f9fafb; 
+  color:#111827; 
+  min-height:100vh; 
+}
+    
+/* Header */
+header { 
+  background:#42145F; 
+  padding:18px 40px; 
+  display:flex; 
+  align-items:center; 
+  gap:20px; 
+  box-shadow:0 6px 10px rgba(0,0,0,0.1); 
+}
+
+header img { 
+  height:90px; 
+  width:190px; 
+  object-fit:contain; 
+  border-radius:8px; 
+}
+    
+header h1 { 
+  font-size:1.6rem; 
+  color:#fff; 
+  margin:0; 
+}
+   
+nav { 
+  margin-left:auto; 
+  display:flex; 
+  gap:10px; 
+  align-items:center; 
+}
+    
+.tab { 
+  color:#fff; 
+  opacity:0.85; 
+  padding:8px 14px; 
+  border-radius:10px; 
+  cursor:pointer; 
+  font-weight:600; 
+}
+  
+.tab.active { 
+  background: rgba(255,255,255,0.12); 
+  opacity:1; 
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.06); 
+}
+
+main { 
+  padding:30px 20px 60px; 
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+  gap:20px; 
+}
+
+/* SEARCH / RECOMMENDATION BOX (Bondi border + Brick button inside) */
+.search-container { 
+  width:100%; 
+  max-width:880px; 
+  background:#fff; 
+  border-radius:14px; 
+  padding:18px; 
+  border:2px solid #42145F; 
+  box-shadow:0 6px 18px rgba(0,0,0,0.08); 
+}
+
+.search-textarea { 
+  width:100%; 
+  min-height:90px; 
+  max-height:260px; 
+  padding:12px; 
+  border-radius:10px; 
+  border:none; 
+  background:#f1f5f9; 
+  font-size:1rem; 
+  resize:vertical; 
+  line-height:1.4; 
+}
+
+.search-actions { 
+  display:flex; 
+  gap:12px; 
+  margin-top:12px; 
+  align-items:center; 
+}
+    
+.btn { 
+  background: #42145F; 
+  color:#fff; 
+  padding:13px 24px; 
+  border-radius:9999px; 
+  border:none; 
+  cursor:pointer; 
+  font-weight:800; 
+  box-shadow:0 6px 14px rgba(0,0,0,0.07); 
+}
+    
+.btn:hover { 
+  transform:translateY(-2px); 
+}
+
+/* Recommendation Results Styling */
+#recResults {
+  margin-top: 28px;
+  padding: 10px 0 40px 0; /* Adds space above and below results */
+  width: 100%;
+  max-width: 950px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* spacing between each card */
+}
+
+/* Each result card spacing and structure */
+.result-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 20px; /* more inner padding */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  margin: 5px 0px;
+  justify-content: space-between;
+  gap: 18px; /* adds spacing between left & right (score) sections */
+  align-items: flex-start;
+  line-height: 1.6; /* better text readability */
+}
+
+/* Centered loading container for APIs */
+.loading-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;              /* covers half of the page height */
+  text-align: center;
+  width: 100%;
+  grid-column: 1 / -1;              /* span across both columns */
+  justify-self: center;             /* horizontally center */
+  align-self: center;               /* vertically center if needed */
+  text-align: center;
+  width: 100%;
+}
+
+.loading-center .spinner-inline {
+  width: 50px;
+  height: 50px;
+  border-width: 4px;
+  margin-bottom: 12px;
+}
+
+.loading-center span {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #42145F;            /* NatWest Scarlet Gum */
+}
+
+/* Spinner*/
+.spinner-inline {
+    width: 50px;
+    height:50px;
+    border-radius:50%;
+    border:3px solid rgba(0,0,0,0.12);
+    border-top-color:#42145F; 
+    animation: spin 1s linear infinite;
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:8px;
+  } 
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* content layout */
+.content { 
+  width:100%; 
+  max-width:1100px; 
+  display:flex; 
+  gap:22px; 
+  align-items:flex-start; 
+  justify-content:center; 
+}
+
+.left-col { 
+  width:100%; 
+}
+
+.cards { 
+  display:grid; 
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap:18px; 
+}
+
+/* API card */
+/* Make the API list vertical (one long card per row) */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* two cards side by side */
+  gap: 20px; /* spacing between the two cards */
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr; /* stack vertically on mobile */
+  }
+}
+
+/* Make each card stack its sections vertically */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(11,18,32,0.06);
+  border-left: 6px solid #42145F;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Ensure headings and meta are full-width and wrap nicely */
+.card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.summary {
+  margin: 8px 0;
+  color: #111827;
+  line-height: 1.6;
+}
+
+.tag {
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #0f172a;
+  margin-right: 6px;
+  margin-top: 6px;
+}
+
+.usage-toggle {
+  margin-top: 8px;
+  color: #42145F;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.95rem;
+  background: transparent;
+  border: none;
+}
+
+.usage-panel pre {
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  overflow: auto;
+}
+
+/* Make usage panel full width */
+.usage-panel { 
+  width: 100%; 
+  box-sizing: border-box; 
+}
+
+.badge { 
+  background:#42145F; 
+  color:#fff; 
+  padding:4px 8px; 
+  border-radius:999px; 
+  font-weight:700; 
+  font-size:0.85rem; 
+}
+
+.small { 
+  font-size:0.85rem; 
+  color:#6b7280; 
+}
+
+/* results list for recommendations */
+.result-card { 
+  background:#fff; 
+  border-radius:10px; 
+  padding:12px; 
+  box-shadow:0 6px 16px rgba(0,0,0,0.06); 
+  display:flex; 
+  justify-content:space-between; 
+  gap:12px; 
+  align-items:flex-start; 
+}
+
+.result-left { 
+  flex:1; 
+}
+
+.result-score {
+  min-width:72px; 
+  text-align:center; 
+  font-weight:700; 
+  color:#fff; 
+  border-radius:8px; 
+  padding:8px; 
+  background:#42145F; 
+}
+
+.muted { 
+  color:#64748b;
+  font-size:0.9rem;
+}
+.link { 
+  color:#0f172a; 
+  text-decoration:none; 
+  font-weight:600; 
+}
+pre.out { 
+  background:#0b1220; 
+  color:#e6eef8; 
+  padding:16px; 
+  border-radius:8px; 
+  white-space:pre-wrap; 
+  line-height:1.6; 
+  font-size:0.95rem; 
+  overflow:auto; 
+}
+
+@media (max-width:900px) { 
+  header img{height:64px;width:120px;} header h1{font-size:1.1rem} .content{padding:0 12px} 
+}

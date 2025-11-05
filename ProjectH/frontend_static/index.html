@@ -1,567 +1,92 @@
-<!doctype html>
+<!-- @format -->
+
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>AI-Powered API Catalog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin:0; font-family:"Segoe UI", Roboto, system-ui; background:#f9fafb; color:#111827; min-height:100vh; }
-    /* Header */
-    header { background:#42145F; padding:18px 40px; display:flex; align-items:center; gap:20px; box-shadow:0 6px 10px rgba(0,0,0,0.1); }
-    header img { height:90px; width:190px; object-fit:contain; border-radius:8px; }
-    header h1 { font-size:1.6rem; color:#fff; margin:0; }
-    nav { margin-left:auto; display:flex; gap:10px; align-items:center; }
-    .tab { color:#fff; opacity:0.85; padding:8px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
-    .tab.active { background: rgba(255,255,255,0.12); opacity:1; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.06); }
+  <head>
+    <meta charset="utf-8" />
+    <title>AI-Powered API Catalog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <img src="assets/NatWest/nwb_white.svg" alt="NatWest Logo" />
+      <h1>AI-Powered API Catalog</h1>
 
-    main { padding:30px 20px 60px; display:flex; flex-direction:column; align-items:center; gap:20px; }
+      <nav>
+        <div id="tabHome" class="tab active">Home</div>
+        <div id="tabRec" class="tab">Recommendations</div>
+      </nav>
+    </header>
 
-    /* SEARCH / RECOMMENDATION BOX (Bondi border + Brick button inside) */
-    .search-container { width:100%; max-width:880px; background:#fff; border-radius:14px; padding:18px; border:2px solid #42145F; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
-    .search-textarea { width:100%; min-height:90px; max-height:260px; padding:12px; border-radius:10px; border:none; background:#f1f5f9; font-size:1rem; resize:vertical; line-height:1.4; }
-    .search-actions { display:flex; gap:12px; margin-top:12px; align-items:center; }
-    .btn { background: #42145F; color:#fff; padding:13px 24px; border-radius:9999px; border:none; cursor:pointer; font-weight:800; box-shadow:0 6px 14px rgba(0,0,0,0.07); }
-    .btn:hover { transform:translateY(-2px); }
-
-    /* Recommendation Results Styling */
-#recResults {
-  margin-top: 28px;
-  padding: 10px 0 40px 0; /* Adds space above and below results */
-  width: 100%;
-  max-width: 950px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px; /* spacing between each card */
-}
-
-/* Each result card spacing and structure */
-.result-card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 16px 20px; /* more inner padding */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-  display: flex;
-  margin: 5px 0px;
-  justify-content: space-between;
-  gap: 18px; /* adds spacing between left & right (score) sections */
-  align-items: flex-start;
-  line-height: 1.6; /* better text readability */
-}
-
-/* Centered loading container for APIs */
-.loading-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 70vh;              /* covers half of the page height */
-  text-align: center;
-  width: 100%;
-  grid-column: 1 / -1;              /* span across both columns */
-  justify-self: center;             /* horizontally center */
-  align-self: center;               /* vertically center if needed */
-  text-align: center;
-  width: 100%;
-}
-
-.loading-center .spinner-inline {
-  width: 50px;
-  height: 50px;
-  border-width: 4px;
-  margin-bottom: 12px;
-}
-
-.loading-center span {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #42145F;            /* NatWest Scarlet Gum */
-}
-
-    /* Spinner*/
-    .spinner-inline {
-      width: 50px;
-      height:50px;
-      border-radius:50%;
-      border:3px solid rgba(0,0,0,0.12);
-      border-top-color:#42145F; 
-      animation: spin 1s linear infinite;
-      display:inline-block;
-      vertical-align:middle;
-      margin-right:8px;
-    } 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* content layout */
-    .content { width:100%; max-width:1100px; display:flex; gap:22px; align-items:flex-start; justify-content:center; }
-    .left-col { width:100%; }
-    .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:18px; }
-
-    /* API card */
-    /* Make the API list vertical (one long card per row) */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* two cards side by side */
-  gap: 20px; /* spacing between the two cards */
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-@media (max-width: 900px) {
-  .cards {
-    grid-template-columns: 1fr; /* stack vertically on mobile */
-  }
-}
-
-/* Make each card stack its sections vertically */
-.card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 6px 18px rgba(11,18,32,0.06);
-  border-left: 6px solid #42145F;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Ensure headings and meta are full-width and wrap nicely */
-
-.card h3 {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-  color: #0f172a;
-  word-break: break-word;
-}
-
-.card .meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #475569;
-}
-
-.summary {
-  margin: 8px 0;
-  color: #111827;
-  line-height: 1.6;
-}
-
-.tag {
-  background: #f1f5f9;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  color: #0f172a;
-  margin-right: 6px;
-  margin-top: 6px;
-}
-
-.usage-toggle {
-  margin-top: 8px;
-  color: #42145F;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: underline;
-  font-size: 0.95rem;
-  background: transparent;
-  border: none;
-}
-
-.usage-panel pre {
-  background: #f8fafc;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #eee;
-  white-space: pre-wrap;
-  line-height: 1.5;
-  overflow: auto;
-}
-
-/* Make usage panel full width */
-.usage-panel { width: 100%; box-sizing: border-box; }
-
-    /*.card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(11,18,32,0.06); border-left:6px solid #009FAC; display:flex; flex-direction:column; gap:8px; }
-    .card h3 { margin:0 0 6px 0; font-size:1.05rem; color:#0f172a; word-break:break-word; }
-    .meta { font-size:0.9rem; color:#475569; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }*/
-    .badge { background:#42145F; color:#fff; padding:4px 8px; border-radius:999px; font-weight:700; font-size:0.85rem; }
-
-    .small { font-size:0.85rem; color:#6b7280; }
-    /*.summary { margin:8px 0; color:#111827; line-height:1.5; }*/
-
-    /* usage panel */
-    /*.usage-panel { margin-top:8px; padding:12px; border-radius:8px; background:#fff; border:1px solid #e6eef6; display:none; white-space:pre-wrap; font-family:monospace; font-size:0.95rem; color:#0b1220; line-height:1.5; }*/
-
-    /* results list for recommendations */
-    .result-card { background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 16px rgba(0,0,0,0.06); display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
-    .result-left { flex:1; }
-    .result-score { min-width:72px; text-align:center; font-weight:700; color:#fff; border-radius:8px; padding:8px; background:#42145F; }
-
-    /* helper */
-    .muted { color:#64748b; font-size:0.9rem; }
-    .link { color:#0f172a; text-decoration:none; font-weight:600; }
-    pre.out { background:#0b1220; color:#e6eef8; padding:16px; border-radius:8px; white-space:pre-wrap; line-height:1.6; font-size:0.95rem; overflow:auto; }
-
-    @media (max-width:900px) { header img{height:64px;width:120px;} header h1{font-size:1.1rem} .content{padding:0 12px} }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="assets/NatWest/nwb_white.svg" alt="NatWest Logo">
-    <h1>AI-Powered API Catalog</h1>
-
-    <nav>
-      <div id="tabHome" class="tab active">Home</div>
-      <div id="tabRec" class="tab">Recommendations</div>
-    </nav>
-  </header>
-
-  <main>
-    <div class="content">
-      <div class="left-col">
-
-        <!-- HOME view -->
-        <div id="viewHome">
-          <div style="display:flex; justify-content:space-between; align-items:center; max-width:1100px; width:100%; margin-bottom:12px;">
-            <div>
-              <div class="muted">All registered APIs</div>
-              <h2 style="margin:6px 0 0 0">API index</h2>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button id="refreshBtn" class="btn" style="background:#42145F; padding:8px 16px; font-weight:800;">Refresh</button>
-            </div>
-          </div>
-
-          <div id="cards" class="cards">
-            <!-- api cards injected here -->
-          </div>
-        </div>
-
-        <!-- RECOMMENDATIONS view (hidden by default) -->
-        <div id="viewRec" style="display:none;">
-          <div style="max-width:1100px; width:100%;">
-            <div class="search-container">
-              <textarea id="recQuery" class="search-textarea" placeholder="Describe what you need (paragraphs allowed)."></textarea>
-              <div class="search-actions">
-                <button id="runRec" class="btn">Search</button>
-                <div id="recStatus" class="muted" style="margin-left:12px; display:flex; align-items:center;"></div>
+    <main>
+      <div class="content">
+        <div class="left-col">
+          <!-- HOME view -->
+          <div id="viewHome">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                max-width: 1100px;
+                width: 100%;
+                margin-bottom: 12px;
+              ">
+              <div>
+                <div class="muted">All registered APIs</div>
+                <h2 style="margin: 6px 0 0 0">API index</h2>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center">
+                <button
+                  id="refreshBtn"
+                  class="btn"
+                  style="
+                    background: #42145f;
+                    padding: 8px 16px;
+                    font-weight: 800;
+                  ">
+                  Refresh
+                </button>
               </div>
             </div>
 
-            <div id="search" class="muted" style="margin-top:18px;"></div>
-            <div id="recResults" style="margin-top:18px;">
-              <!-- recommendation cards inserted here -->
+            <div id="cards" class="cards">
+              <!-- api cards injected here -->
+            </div>
+          </div>
+
+          <!-- RECOMMENDATIONS view (hidden by default) -->
+          <div id="viewRec" style="display: none">
+            <div style="max-width: 1100px; width: 100%">
+              <div class="search-container">
+                <textarea
+                  id="recQuery"
+                  class="search-textarea"
+                  placeholder="Describe what you need (paragraphs allowed)."></textarea>
+                <div class="search-actions">
+                  <button id="runRec" class="btn">Search</button>
+                  <div
+                    id="recStatus"
+                    class="muted"
+                    style="
+                      margin-left: 12px;
+                      display: flex;
+                      align-items: center;
+                    "></div>
+                </div>
+              </div>
+
+              <div id="search" class="muted" style="margin-top: 18px"></div>
+              <div id="recResults" style="margin-top: 18px">
+                <!-- recommendation cards inserted here -->
+              </div>
             </div>
           </div>
         </div>
-
       </div>
-    </div>
-  </main>
+    </main>
 
-<script>
-/*
-  Frontend SPA logic:
-  - GET /all  -> returns { data: [...] } (list of APIs)
-  - POST /enrich -> existing enrichment endpoint
-*/
-
-// endpoints (use full local URLs)
-const ALL_URL = "http://127.0.0.1:3000/ ";
-const ENRICH_URL = "http://127.0.0.1:3000/enrich";
-
-// Tabs
-const tabHome = document.getElementById('tabHome');
-const tabRec = document.getElementById('tabRec');
-const viewHome = document.getElementById('viewHome');
-const viewRec = document.getElementById('viewRec');
-
-tabHome.addEventListener('click', () => { showView('home'); });
-tabRec.addEventListener('click', () => { showView('rec'); });
-
-function showView(which){
-  if(which === 'home'){
-    viewHome.style.display = '';
-    viewRec.style.display = 'none';
-    tabHome.classList.add('active');
-    tabRec.classList.remove('active');
-  } else {
-    viewHome.style.display = 'none';
-    viewRec.style.display = '';
-    tabHome.classList.remove('active');
-    tabRec.classList.add('active');
-  }
-}
-
-// load all APIs and render
-const cardsEl = document.getElementById('cards');
-const refreshBtn = document.getElementById('refreshBtn');
-
-function makeLoadingNode(text = 'Loading APIs…') {
-  const container = document.createElement('div');
-  container.className = 'loading-center'; // centered style
-  const spinner = document.createElement('span');
-  spinner.className = 'spinner-inline';
-  const label = document.createElement('span');
-  label.textContent = text;
-  container.appendChild(spinner);
-  container.appendChild(label);
-  return container;
-}
-
-
-async function fetchAll(){
-  cardsEl.innerHTML = '';
-  cardsEl.appendChild(makeLoadingNode('Loading APIs…'));
-  try {
-    const r = await fetch(ALL_URL, { cache: 'no-store' });
-    if(!r.ok) throw new Error(await r.text());
-    const payload = await r.json();
-    const data = payload.data || [];
-    renderCards(data);
-  } catch (err) {
-    cardsEl.innerHTML = '';
-    const n = document.createElement('div');
-    n.className = 'muted';
-    n.innerHTML = `Failed to load APIs: ${escapeHtml(err.message)}`;
-    cardsEl.appendChild(n);
-  }
-}
-
-// Convert ISO date → human readable (e.g., "June 15 2024 · 12:00 PM")
-function formatDate(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (isNaN(d)) return '—';
-  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  /*return d.toLocaleString('en-US', options).replace(',', ' ·');*/
-  return d.toLocaleString('en-US', { ...options, timeZone: 'UTC' });
-
-}
-
-function renderCards(list){
-  if(!Array.isArray(list) || list.length === 0){
-    cardsEl.innerHTML = '<div class="muted">No APIs found.</div>';
-    return;
-  }
-  cardsEl.innerHTML = '';
-
-  list.forEach(api => {
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    const name = api.api_name || '—';
-    const summary = api.summary || api.description || '';
-    const owner = api.owner || '—';
-    const rating = (api.rating !== undefined) ? api.rating : '—';
-    const tags = Array.isArray(api.tags) ? api.tags : [];
-    const created = formatDate(api.created_at || api.created);
-    const updated = formatDate(api.updated_at || api.updated);  
-    const swaggerHref = api.swagger || api.documentation || '#';
-    const exampleRequest = api.example_request ? JSON.stringify(api.example_request, null, 2) : '';
-    const predictedResponse = api.predicted_response_shape ? JSON.stringify(api.predicted_response_shape, null, 2) : '';
-
-    const usageId = 'usage_' + Math.random().toString(36).slice(2,9);
-
-    card.innerHTML = `
-      <h3>API Name: <a class="link" href="${escapeHtml(swaggerHref)}" target="_blank" rel="noreferrer">${escapeHtml(name)}</a></h3>
-
-      <div class="meta">
-        <div class="small">Owner: <strong>${escapeHtml(owner)}</strong></div>
-        <div class="small">Updated: ${escapeHtml(updated)}</div>
-        <div class="small">Created: ${escapeHtml(created)}</div>
-        <div style="margin-left:auto;">Rating: <span class="badge">${escapeHtml(rating)}</span></div>
-      </div>
-
-      <p class="summary">Summary: ${escapeHtml(summary)}</p>
-
-      <div>Tags: ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>
-
-      <div style="margin-top:8px;">
-        <button class="usage-toggle" data-target="${usageId}">Show usage / Swagger</button>
-        <div id="${usageId}" class="usage-panel" aria-hidden="true"></div>
-      </div>
-    `;
-
-    cardsEl.appendChild(card);
-
-    // after injecting into DOM, attach data and listener to the toggle button
-    const btn = card.querySelector('.usage-toggle');
-    const panel = card.querySelector('.usage-panel');
-
-    // store usage data on the button (safe, not in DOM attributes)
-    btn._usage = {
-      documentation: api.documentation || '',
-      swagger: api.swagger || '',
-      exampleRequest,
-      predictedResponse
-    };
-
-    // Toggle handler: populate panel only on first open
-    btn.addEventListener('click', () => {
-      const isOpen = panel.style.display === 'block';
-      if (isOpen) {
-        panel.style.display = 'none';
-        panel.setAttribute('aria-hidden', 'true');
-        btn.textContent = 'Show usage / Swagger';
-        return;
-      }
-
-      // If panel empty, build content from stored data
-      if (!panel.innerHTML.trim()) {
-        const parts = [];
-        const u = btn._usage;
-
-        if (u.documentation) {
-          parts.push(`<div><strong>Documentation:</strong> <a href="${escapeHtml(u.documentation)}" target="_blank">${escapeHtml(u.documentation)}</a></div>`);
-        }
-        if (u.swagger) {
-          parts.push(`<div><strong>Swagger:</strong> <a href="${escapeHtml(u.swagger)}" target="_blank">${escapeHtml(u.swagger)}</a></div>`);
-        }
-        if (u.exampleRequest) {
-          parts.push(`<div style="margin-top:8px;"><strong>Example request:</strong><pre>${escapeHtml(u.exampleRequest)}</pre></div>`);
-        }
-        if (u.predictedResponse) {
-          parts.push(`<div style="margin-top:8px;"><strong>Predicted response shape:</strong><pre>${escapeHtml(u.predictedResponse)}</pre></div>`);
-        }
-
-        // If no parts, show message now (only visible after click)
-        if (parts.length === 0) {
-          parts.push('<div class="muted">No usage details available.</div>');
-        }
-
-        panel.innerHTML = parts.join('<br/>');
-      }
-
-      panel.style.display = 'block';
-      panel.setAttribute('aria-hidden', 'false');
-      btn.textContent = 'Hide usage / Swagger';
-    });
-  });
-}
-
-// small escaping to avoid injection when rendering names/links
-function escapeHtml(s){
-  if(s === null || s === undefined) return '';
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
-
-// refresh button
-refreshBtn.addEventListener('click', fetchAll);
-
-// initial load
-fetchAll();
-
-
-// ---------------- Recommendations view ----------------
-const runRecBtn = document.getElementById('runRec');
-const recQuery = document.getElementById('recQuery');
-const recStatus = document.getElementById('recStatus');
-const recResults = document.getElementById('recResults');
-const recSearch = document.getElementById('search');
-
-if(runRecBtn){
-  runRecBtn.addEventListener('click', runRec);
-}
-if(recQuery){
-  recQuery.addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); runRec(); } });
-}
-
-// helper to show spinner + text
-function showRecLoading(text = 'Searching…') {
-  recSearch.innerHTML = '';
-  recSearch.className = 'loading-center';
-  
-  const spinner = document.createElement('span');
-  spinner.className = 'spinner-inline';
-  const label = document.createElement('span');
-  label.textContent = text;
-  
-  recSearch.appendChild(spinner);
-  recSearch.appendChild(label);
-
-  // Hide results during search
-  recResults.innerHTML = '';
-  recResults.style.display = 'none';
-}
-
-
-function hideRecLoading() {
-  recSearch.className = 'muted';
-  recSearch.innerHTML = '';
-  recResults.style.display = '';
-  recStatus.className = 'muted';
-  recStatus.innerHTML = '';
-}
-
-
-async function runRec(){
-  const q = recQuery.value.trim();
-  if(!q){ alert('Please enter a description or query'); recQuery.focus(); return; }
-  showRecLoading('Searching…');
-  recResults.innerHTML = '';
-  try {
-    const r = await fetch(ENRICH_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ query: q })
-    });
-    const text = await r.text();
-    if(!r.ok) throw new Error(text || r.statusText);
-    const payload = JSON.parse(text);
-    const results = payload.results || [];
-    renderRecResults(results);
-    hideRecLoading();
-    recStatus.textContent = `Found ${results.length} result(s)`;
-    // switch to recommendations view (in case user called from URL)
-    showView('rec');
-  } catch(err){
-    hideRecLoading();
-    recStatus.textContent = `Error: ${err.message}`;
-  }
-}
-
-function renderRecResults(results){
-  if(!Array.isArray(results) || results.length === 0){
-    recResults.innerHTML = '<div class="muted">No recommendations found.</div>';
-    return;
-  }
-  recResults.innerHTML = '';
-  results.forEach(r => {
-    const rc = document.createElement('div');
-    rc.className = 'result-card';
-    const left = document.createElement('div');
-    left.className = 'result-left';
-    const title = `<div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-                     <div><a class="link" href="${escapeHtml(r.api_name)}" target="_blank">API name: ${escapeHtml(r.api_name)}</a></div>
-                     <div class="muted small">Match Type: ${escapeHtml(r.match_type || '')}</div>
-                   </div>`;
-    const summary = `<div class="small" style="margin-top:6px; line-height:1.5;">Summary: ${escapeHtml(r.summary || '')}</div>`;
-    const tags = (Array.isArray(r.matched_tags) && r.matched_tags.length) ? `<div style="margin-top:8px">${r.matched_tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join(' ')}</div>` : '';
-    const why = r.why ? `<div class="muted small" style="margin-top:8px">Why: ${escapeHtml(r.why)}</div>` : '';
-    left.innerHTML = title + summary + tags + why;
-
-    const scoreBox = document.createElement('div');
-    scoreBox.className = 'result-score';
-    scoreBox.textContent = (typeof r.score === 'number') ? r.score.toFixed(2) : (r.score || '—');
-
-    rc.appendChild(left);
-    rc.appendChild(scoreBox);
-    recResults.appendChild(rc);
-  });
-}
-
-// Optional: Show recommendations view on load if a query param ?rec=1 is present
-if(location.search.includes('rec=1')) {
-  showView('rec');
-}
-</script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
