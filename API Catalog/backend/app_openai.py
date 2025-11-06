@@ -180,7 +180,7 @@ Output only the JSON structure described above—no extra prose or commentary.
 
 ---------------------------------------------------------------------
 
-User Query Input :
+User Query Input : 
 """
 
 # ==== HELPERS ====
