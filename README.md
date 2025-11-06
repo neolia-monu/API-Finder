@@ -8,8 +8,8 @@
 
 * [Screenshots / Images](#screenshots--images)
 * [Architecture Diagram](#architecture-diagram)
-* [How it works (summary)](#how-it-works-summary)
-* [File layout (suggested)](#file-layout-suggested)
+* [How it works](#how-it-works)
+* [File layout](#file-layout)
 
 ---
 
